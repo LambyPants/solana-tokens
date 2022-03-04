@@ -1,8 +1,17 @@
 use anchor_lang::prelude::*;
 use anchor_lang::solana_program::system_program;
+use anchor_lang::solana_program::{
+    program::{invoke, invoke_signed},
+    system_instruction,
+};
+
 use anchor_spl::{
     associated_token::AssociatedToken,
     token::{Mint, Token, TokenAccount},
+};
+use mpl_token_metadata::{
+    instruction::{create_metadata_accounts, update_metadata_accounts},
+    state::Creator,
 };
 
 declare_id!("Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS");
@@ -53,42 +62,79 @@ pub mod dosolana {
             ),
             5,
         )?;
-        Ok(())
-    }
 
-    pub fn init_raw(ctx: Context<InitRaw>, mint_bump: u8) -> Result<()> {
-        println!("my mint bump {}", mint_bump);
-        Ok(())
-    }
+        let metadata_infos = vec![
+            ctx.accounts.metadata.clone(),
+            ctx.accounts.mint.to_account_info().clone(),
+            ctx.accounts.mint_authority.clone(),
+            ctx.accounts.mint_authority.clone(),
+            ctx.accounts.token_metadata_program.clone(),
+            ctx.accounts.token_program.to_account_info().clone(),
+            ctx.accounts.system_program.clone(),
+            ctx.accounts.rent.to_account_info().clone(),
+            ctx.accounts.payer.to_account_info().clone(),
+        ];
+        let nft_name = String::from("Ryan");
+        let symbol = String::from("RL");
+        let nft_uri = String::from("https://solana.com");
+        let authority_seeds = ["".as_bytes(), &[mint_bump]];
 
-    pub fn airdrop(ctx: Context<AirDrop>, mint_bump: u8) -> Result<()> {
-        msg!("my mint bump {}", mint_bump);
-        msg!(
-            "{} tokens have been minted so far...",
-            ctx.accounts.mint.supply
+        let ix = &create_metadata_accounts(
+            *ctx.accounts.token_metadata_program.key,
+            *ctx.accounts.metadata.key,
+            ctx.accounts.mint.key(),
+            *ctx.accounts.mint_authority.key,
+            *ctx.accounts.payer.key,
+            *ctx.accounts.mint_authority.key,
+            nft_name,
+            symbol,
+            nft_uri,
+            None,
+            0,
+            true,  // update auth is signer?
+            false, // is mutable?
         );
-        anchor_spl::token::mint_to(
-            CpiContext::new_with_signer(
-                ctx.accounts.token_program.to_account_info(),
-                anchor_spl::token::MintTo {
-                    mint: ctx.accounts.mint.to_account_info(),
-                    to: ctx.accounts.destination.to_account_info(),
-                    authority: ctx.accounts.mint.to_account_info(),
-                },
-                &[&[&[], &[mint_bump]]],
-            ),
-            5,
-        )?;
 
-        ctx.accounts.mint.reload()?;
-
-        msg!(
-            "{} tokens have been minted so far...",
-            ctx.accounts.mint.supply
-        );
+        msg!("metadata_infos {:?}", ix);
+        /* set the metadata of the NFT */
+        invoke_signed(&ix, metadata_infos.as_slice(), &[&authority_seeds])?;
         Ok(())
     }
 }
+
+//     pub fn init_raw(ctx: Context<InitRaw>, mint_bump: u8) -> Result<()> {
+//         println!("my mint bump {}", mint_bump);
+//         Ok(())
+//     }
+
+//     pub fn airdrop(ctx: Context<AirDrop>, mint_bump: u8) -> Result<()> {
+//         msg!("my mint bump {}", mint_bump);
+//         msg!(
+//             "{} tokens have been minted so far...",
+//             ctx.accounts.mint.supply
+//         );
+//         anchor_spl::token::mint_to(
+//             CpiContext::new_with_signer(
+//                 ctx.accounts.token_program.to_account_info(),
+//                 anchor_spl::token::MintTo {
+//                     mint: ctx.accounts.mint.to_account_info(),
+//                     to: ctx.accounts.destination.to_account_info(),
+//                     authority: ctx.accounts.mint.to_account_info(),
+//                 },
+//                 &[&[&[], &[mint_bump]]],
+//             ),
+//             5,
+//         )?;
+
+//         ctx.accounts.mint.reload()?;
+
+//         msg!(
+//             "{} tokens have been minted so far...",
+//             ctx.accounts.mint.supply
+//         );
+//         Ok(())
+//     }
+// }
 
 #[derive(Accounts)]
 pub struct WriteMessage<'info> {
@@ -117,7 +163,14 @@ pub struct InitMint<'info> {
     pub payer: Signer<'info>,
     #[account(init, payer = payer, associated_token::mint = mint, associated_token::authority = payer)]
     pub destination: Account<'info, TokenAccount>,
+    #[account(mut)]
+    pub metadata: AccountInfo<'info>,
+    #[account(signer, mut)]
+    pub mint_authority: AccountInfo<'info>,
+    #[account(address = spl_token::id())]
     pub token_program: Program<'info, Token>,
+    #[account(address = mpl_token_metadata::id())]
+    pub token_metadata_program: AccountInfo<'info>,
     pub associated_token_program: Program<'info, AssociatedToken>,
     #[account(address = system_program::ID)]
     pub system_program: AccountInfo<'info>,
