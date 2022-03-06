@@ -9,7 +9,7 @@ use anchor_spl::{
     associated_token::AssociatedToken,
     token::{Mint, Token, TokenAccount},
 };
-use metaplex_token_metadata::{
+use mpl_token_metadata::{
     instruction::{create_metadata_accounts, update_metadata_accounts},
     state::Creator,
 };

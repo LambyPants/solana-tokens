@@ -71,7 +71,7 @@ describe('dosolana', () => {
 
     /* metaplex program */
     const TOKEN_METADATA_PROGRAM_ID = new anchor.web3.PublicKey(
-      'CjUFcyuiTmCwj1FMvSNrWL67gd3KFnLQWWs3zFSjh56r',
+      'metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s',
     );
     console.log({ mint, mintBump });
     const [metaddress, metabump] =
@@ -105,21 +105,21 @@ describe('dosolana', () => {
 
     console.log({ ourAssociatedTokens: ourAssociatedTokens.toString() });
     const message = anchor.web3.Keypair.generate();
-    // await program.rpc.initMint(mintBump, {
-    //   accounts: {
-    //     mint: mint,
-    //     payer: program.provider.wallet.publicKey,
-    //     metadata: metaddress,
-    //     destination: ourAssociatedTokens,
-    //     systemProgram: anchor.web3.SystemProgram.programId,
-    //     mintAuthority: message.publicKey,
-    //     tokenProgram: spl.TOKEN_PROGRAM_ID,
-    //     tokenMetadataProgram: TOKEN_METADATA_PROGRAM_ID,
-    //     associatedTokenProgram: spl.ASSOCIATED_TOKEN_PROGRAM_ID,
-    //     rent: anchor.web3.SYSVAR_RENT_PUBKEY,
-    //   },
-    //   signers: [message],
-    // });
+    await program.rpc.initMint(mintBump, {
+      accounts: {
+        mint: mint,
+        payer: program.provider.wallet.publicKey,
+        metadata: metaddress,
+        destination: ourAssociatedTokens,
+        systemProgram: anchor.web3.SystemProgram.programId,
+        mintAuthority: message.publicKey,
+        tokenProgram: spl.TOKEN_PROGRAM_ID,
+        tokenMetadataProgram: TOKEN_METADATA_PROGRAM_ID,
+        associatedTokenProgram: spl.ASSOCIATED_TOKEN_PROGRAM_ID,
+        rent: anchor.web3.SYSVAR_RENT_PUBKEY,
+      },
+      signers: [message],
+    });
 
     let nicelyParsedMint = await fetchMint(mint);
     let nicelyParsedDestinationRightAfterMint = await fetchTokenAccount(
