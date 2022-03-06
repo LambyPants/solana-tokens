@@ -1,7 +1,7 @@
 [features]
 seeds = false
 [programs.localnet]
-dosolana = "Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS"
+dosolana = "CzNK8VzM3KfNhSfYsb6bnNSK6q8moS6cVsBrbf99fgH5"
 
 [registry]
 url = "https://anchor.projectserum.com"

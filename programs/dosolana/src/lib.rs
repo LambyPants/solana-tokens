@@ -9,12 +9,12 @@ use anchor_spl::{
     associated_token::AssociatedToken,
     token::{Mint, Token, TokenAccount},
 };
-use mpl_token_metadata::{
+use metaplex_token_metadata::{
     instruction::{create_metadata_accounts, update_metadata_accounts},
     state::Creator,
 };
 
-declare_id!("Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS");
+declare_id!("CzNK8VzM3KfNhSfYsb6bnNSK6q8moS6cVsBrbf99fgH5");
 
 const DISCRIMINATOR_LENGTH: usize = 8;
 const PUBLIC_KEY_LENGTH: usize = 32;
@@ -66,7 +66,7 @@ pub mod dosolana {
         let metadata_infos = vec![
             ctx.accounts.metadata.clone(),
             ctx.accounts.mint.to_account_info().clone(),
-            ctx.accounts.mint_authority.clone(),
+            ctx.accounts.mint.to_account_info().clone(),
             ctx.accounts.mint_authority.clone(),
             ctx.accounts.token_metadata_program.clone(),
             ctx.accounts.token_program.to_account_info().clone(),
@@ -83,7 +83,7 @@ pub mod dosolana {
             *ctx.accounts.token_metadata_program.key,
             *ctx.accounts.metadata.key,
             ctx.accounts.mint.key(),
-            *ctx.accounts.mint_authority.key,
+            ctx.accounts.mint.key(),
             *ctx.accounts.payer.key,
             *ctx.accounts.mint_authority.key,
             nft_name,
@@ -95,7 +95,10 @@ pub mod dosolana {
             false, // is mutable?
         );
 
-        msg!("metadata_infos {:?}", ix);
+        msg!(
+            "metadata_infos {:?}",
+            ctx.accounts.token_metadata_program.to_account_info(),
+        );
         /* set the metadata of the NFT */
         invoke_signed(&ix, metadata_infos.as_slice(), &[&authority_seeds])?;
         Ok(())
@@ -169,7 +172,7 @@ pub struct InitMint<'info> {
     pub mint_authority: AccountInfo<'info>,
     #[account(address = spl_token::id())]
     pub token_program: Program<'info, Token>,
-    #[account(address = mpl_token_metadata::id())]
+    // #[account(address = "Bp1J9Xvgra5MoEj39UGPrAHpmncCdkCQjD6Qi7dZ2hHY")]
     pub token_metadata_program: AccountInfo<'info>,
     pub associated_token_program: Program<'info, AssociatedToken>,
     #[account(address = system_program::ID)]
