@@ -14,7 +14,7 @@ use mpl_token_metadata::{
     state::Creator,
 };
 
-declare_id!("CzNK8VzM3KfNhSfYsb6bnNSK6q8moS6cVsBrbf99fgH5");
+declare_id!("FWkWQF76FmLgvie915MUSd6SmqoDkaaZJeU2B4vxguw7");
 
 const DISCRIMINATOR_LENGTH: usize = 8;
 const PUBLIC_KEY_LENGTH: usize = 32;
@@ -74,7 +74,7 @@ pub mod dosolana {
             ctx.accounts.rent.to_account_info().clone(),
             ctx.accounts.payer.to_account_info().clone(),
         ];
-        let nft_name = String::from("Ryan");
+        let nft_name = String::from("Ryan Lambert");
         let symbol = String::from("RL");
         let nft_uri = String::from("https://solana.com");
         let authority_seeds = ["".as_bytes(), &[mint_bump]];
@@ -155,7 +155,7 @@ pub struct InitMint<'info> {
     #[account(
     init,
     payer = payer,
-    mint::decimals = 1,
+    mint::decimals = 0,
     seeds = [],
     bump,
     mint::authority = mint,
